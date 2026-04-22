@@ -1,25 +1,54 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { inventoryApi } from '../services/inventoryApi';
-import InventoryForm from '../components/inventory/InventoryForm';
+import * as inventoryApi from '../services/inventoryApi'; // Змінено імпорт
+import { useInventory } from '../store/InventoryContext';
 
 const AdminInventoryCreate = () => {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [photo, setPhoto] = useState(null);
   const navigate = useNavigate();
+  const { fetchInventory } = useInventory();
 
-  const handleCreate = async (formData) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('inventory_name', name);
+    formData.append('description', description);
+    formData.append('photo', photo);
+
     try {
-      await inventoryApi.create(formData); // Використовує POST /register [cite: 71]
-      alert('Позицію успішно створено!');
-      navigate('/admin'); // Повертаємось до списку [cite: 101]
-    } catch (err) {
-      alert('Помилка при створенні: ' + err.message);
+      await inventoryApi.create(formData); // Виклик функції напряму
+      await fetchInventory(); // Оновлюємо глобальний список
+      navigate('/admin');
+    } catch (error) {
+      console.error("Помилка створення:", error);
     }
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Додати нову позицію</h1>
-      <InventoryForm onSubmit={handleCreate} />
+    <div className="container">
+      <h1>Додати новий інвентар 🌸</h1>
+      <form onSubmit={handleSubmit}>
+        <input 
+          type="text" 
+          placeholder="Назва інвентарю" 
+          value={name} 
+          onChange={(e) => setName(e.target.value)} 
+          required 
+        />
+        <textarea 
+          placeholder="Опис" 
+          value={description} 
+          onChange={(e) => setDescription(e.target.value)} 
+        />
+        <input 
+          type="file" 
+          onChange={(e) => setPhoto(e.target.files[0])} 
+          required 
+        />
+        <button type="submit">Зберегти</button>
+      </form>
     </div>
   );
 };

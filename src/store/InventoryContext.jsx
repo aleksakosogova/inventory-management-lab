@@ -1,18 +1,34 @@
-import { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import * as inventoryApi from '../services/inventoryApi';
 
-const InventoryContext = createContext();
+export const InventoryContext = createContext(); // [cite: 49]
 
 export const InventoryProvider = ({ children }) => {
-  const [inventory, setInventory] = useState([]); // Масив товарів [cite: 54]
-  const [loading, setLoading] = useState(false);  // Стан завантаження [cite: 104]
-  const [error, setError] = useState(null);      // Стан помилки [cite: 106]
+    const [inventory, setInventory] = useState([]);
+    const [loading, setLoading] = useState(true); // Стан завантаження [cite: 104]
 
-  return (
-    <InventoryContext.Provider value={{ inventory, setInventory, loading, setLoading, error, setError }}>
-      {children}
-    </InventoryContext.Provider>
-  );
+    const fetchInventory = async () => {
+        try {
+            setLoading(true);
+            const data = await inventoryApi.getAll();
+            setInventory(data);
+        } catch (error) {
+            console.error("Помилка завантаження:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchInventory();
+    }, []);
+
+    return (
+        <InventoryContext.Provider value={{ inventory, fetchInventory, loading }}>
+            {children}
+        </InventoryContext.Provider>
+    );
 };
 
-// Спеціальний хук, щоб зручно діставати дані в будь-якому компоненті
+// Хук для зручного доступу в компонентах
 export const useInventory = () => useContext(InventoryContext);

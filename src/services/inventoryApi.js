@@ -1,28 +1,37 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api'; 
+const API_URL = 'http://localhost:5000/api';
 
-export const inventoryApi = {
-  // Отримати весь список (GET /inventory) [cite: 63]
-  getAll: () => axios.get(`${API_URL}/inventory`),
+// Отримання всього списку [cite: 63]
+export const getAll = async () => {
+    const response = await axios.get(`${API_URL}/inventory`);
+    return response.data;
+};
 
-  // Отримати деталі за ID (GET /inventory/:id) [cite: 78]
-  getById: (id) => axios.get(`${API_URL}/inventory/${id}`),
+// Отримання одного товару [cite: 78]
+export const getById = async (id) => {
+    const response = await axios.get(`${API_URL}/inventory/${id}`);
+    return response.data;
+};
 
-  // Реєстрація нової позиції (POST /register) [cite: 71]
-  // Використовуємо FormData для передачі фото (multipart/form-data) [cite: 73]
-  create: (formData) => axios.post(`${API_URL}/register`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+// Створення (Multipart для фото) [cite: 71, 73]
+export const create = async (formData) => {
+    const response = await axios.post(`${API_URL}/register`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+};
 
-  // Оновлення тексту (PUT /inventory/:id) [cite: 88]
-  updateText: (id, data) => axios.put(`${API_URL}/inventory/${id}`, data),
+// Оновлення (Тепер теж Multipart для підтримки фото) [cite: 88, 95, 96]
+export const update = async (id, formData) => {
+    const response = await axios.put(`${API_URL}/inventory/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+};
 
-  // Оновлення фото (PUT /inventory/:id/photo) [cite: 95]
-  updatePhoto: (id, formData) => axios.put(`${API_URL}/inventory/${id}/photo`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-
-  // Видалення (DELETE /inventory/:id) [cite: 100]
-  delete: (id) => axios.delete(`${API_URL}/inventory/${id}`)
+// Видалення [cite: 100]
+export const deleteItem = async (id) => {
+    const response = await axios.delete(`${API_URL}/inventory/${id}`);
+    return response.data;
 };
